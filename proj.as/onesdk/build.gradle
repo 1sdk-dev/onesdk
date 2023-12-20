@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    namespace 'tech.mxin.onesdk.framework'
+    compileSdk 19
+
+    defaultConfig {
+        minSdk 19
+
+        versionCode 1
+        versionName "0.1"
+
+        consumerProguardFiles "consumer-rules.pro"
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_TOOLCHAIN=clang', "-DANDROID_STL=c++_static"
+                cppFlags "-std=c++11"
+                targets "onesdk"
+            }
+        }
+    }
+
+    buildFeatures {
+        prefab true
+        prefabPublishing true
+    }
+
+    prefab {
+        onesdk {
+            headers "${project.projectDir}/src/main/cpp/include"
+        }
+    }
+
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+}

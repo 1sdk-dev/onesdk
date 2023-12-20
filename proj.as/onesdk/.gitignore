@@ -1,0 +1,4 @@
+/build
+/.cxx
+/src/main/java/tech/mxin/onesdk/agent
+/src/main/java/tech/mxin/onesdk/internal
