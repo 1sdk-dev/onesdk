@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * <p>
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,43 +19,27 @@ package tech.mxin.onesdk.framework.mock;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Handler;
-import android.widget.EditText;
-import android.widget.Toast;
 
-import java.lang.reflect.Method;
 import java.util.Hashtable;
 
-import tech.mxin.onesdk.framework.SDKLogger;
 import tech.mxin.onesdk.framework.SDKHelper;
-import tech.mxin.onesdk.framework.SDKWrapper;
+import tech.mxin.onesdk.framework.SDKLogger;
 import tech.mxin.onesdk.framework.SDKUtils;
+import tech.mxin.onesdk.framework.SDKWrapper;
 import tech.mxin.onesdk.framework.protocol.InterfaceUser;
 import tech.mxin.onesdk.framework.wrapper.UserWrapper;
 
 public class MockUser implements InterfaceUser {
-    private static Context mContext = null;
-    private static String TAG = "MockUser";
-    private MockUser mAdapter = null;
+    private static final String TAG = "MockUser";
+    private static final String PLUGIN_ID = "MockUser";
+    private final Context mContext;
+    private final MockUser mAdapter;
     private boolean isInited = false;
-    private static boolean mLogined = false;
-    private static String mUserId = "";
-    private static String mSessionId = "";
+
     private Hashtable<String, String> userInfo = null;
 
-    private static void LogE(String msg, Exception e) {
-        try {
-            SDKLogger.logE(TAG, msg, e);
-        } catch (Exception e2) {
-            SDKLogger.logE(TAG, msg, e2);
-        }
-    }
-
-    private static void LogD(String msg) {
-        try {
-            SDKLogger.logD(TAG, msg);
-        } catch (Exception e) {
-            SDKLogger.logE(TAG, msg, e);
-        }
+    private static void LogD(String format, Object... args) {
+        SDKLogger.logD(TAG, format, args);
     }
 
     public MockUser(Context context) {
@@ -69,7 +53,7 @@ public class MockUser implements InterfaceUser {
             if (isInited) return;
             new Handler().postDelayed(() -> {
                 isInited = true;
-                UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_INIT_SUCCESS, "init success");
+                userResult(UserWrapper.ACTION_RET_INIT_SUCCESS, "init success");
             }, 1000);
         });
     }
@@ -79,77 +63,61 @@ public class MockUser implements InterfaceUser {
         LogD("login() invoked!");
         SDKWrapper.runOnMainThread(() -> {
             if (!isInited) {
-                UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGIN_FAIL, "not init");
+                userResult(UserWrapper.ACTION_RET_LOGIN_FAIL, "not init");
                 return;
             }
             if (!SDKUtils.networkReachable(mContext)) {
-                UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGIN_TIMEOUT, "network is unreachable");
+                userResult(UserWrapper.ACTION_RET_LOGIN_TIMEOUT, "network is unreachable");
                 return;
             }
-            EditText editText = new EditText(mContext);
-            editText.setHint("Please input username");
-            AlertDialog.Builder dialog = new AlertDialog.Builder(mContext);
-            dialog.setTitle("Login").setView(editText).setCancelable(false);
-            dialog.setPositiveButton("Login", (dialogInterface, i) -> {
-                if (editText.getText().toString().isEmpty()) {
-                    UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGIN_FAIL, "username  is empty");
-                    return;
+            MockUtils.alertLogin(mContext, new ILoginCallback() {
+                @Override
+                public void success(String username) {
+                    MockUtils.setLoginState(true);
+                    Hashtable<String, String> user = new Hashtable<>();
+                    user.put("userID", "userID11111111");
+                    user.put("userName", username);
+                    user.put("userLevel", "userLevel-1");
+                    setUserInfo(user);
+                    userResult(UserWrapper.ACTION_RET_LOGIN_SUCCESS, "success");
                 }
-                userLogin(editText.getText().toString(), "password", (code, msg) -> {
-                    if (code == UserWrapper.ACTION_RET_LOGIN_SUCCESS) {
-                        mLogined = true;
-                        Hashtable<String, String> user = new Hashtable<>();
-                        user.put("userID", "userID11111111");
-                        user.put("userName", "userName");
-                        user.put("userLevel",  "userLevel-1");
-                        setUserInfo(user);
-                        UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGIN_SUCCESS, msg);
-                    } else {
-                        mLogined = false;
-                        UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGIN_FAIL, msg);
-                    }
-                });
+
+                @Override
+                public void failed(String reason) {
+                    MockUtils.setLoginState(false);
+                    MockUtils.makeText(mContext, reason);
+                    userResult(UserWrapper.ACTION_RET_LOGIN_FAIL, reason);
+                }
+
+                @Override
+                public void cancel() {
+                    MockUtils.setLoginState(false);
+                    MockUtils.makeText(mContext, "the login has been canceled");
+                    userResult(UserWrapper.ACTION_RET_LOGIN_CANCEL, "the login has been canceled");
+                }
             });
-            dialog.setNegativeButton("Cancel", (dialogInterface, i) -> {
-                SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "the login has been canceled", Toast.LENGTH_SHORT).show());
-                UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGIN_CANCEL, "the login has been canceled");
-            });
-            dialog.create().show();
         });
-    }
-
-    @Override
-    public void login(Hashtable<String, String> extension) {
-        login();
-    }
-
-    private void userLogin(String name, String password, final ILoginCallback callback) {
-        callback.onResult(UserWrapper.ACTION_RET_LOGIN_SUCCESS, "success");
     }
 
     @Override
     public void logout() {
         LogD("logout() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "logout() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "logout() invoked!");
         SDKWrapper.runOnMainThread(() -> {
-            if (!mLogined) {
-                UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGOUT_FAIL, "not need logout");
+            if (!MockUtils.getLoginState()) {
+                userResult(UserWrapper.ACTION_RET_LOGOUT_FAIL, "not need logout");
                 LogD("User not logined!");
-                SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "User not logined!", Toast.LENGTH_SHORT).show());
+                MockUtils.makeText(mContext, "User not logined!");
                 return;
             }
-            userLogout();
+            userResult(UserWrapper.ACTION_RET_LOGOUT_SUCCESS, "");
         });
 
     }
 
-    private void userLogout() {
-        UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_LOGOUT_SUCCESS, "");
-    }
-
     public void pause() {
         LogD("pause() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "pause() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "pause() invoked!");
     }
 
     public void exit() {
@@ -158,7 +126,7 @@ public class MockUser implements InterfaceUser {
             AlertDialog.Builder dialog02 = new AlertDialog.Builder(mContext);
             dialog02.setTitle("Exit");
             dialog02.setMessage("Exit");
-            dialog02.setPositiveButton("Confirm", (dialogInterface, i) -> UserWrapper.onUserResult(mAdapter, UserWrapper.ACTION_RET_EXIT_PAGE, "exit"));
+            dialog02.setPositiveButton("Confirm", (dialogInterface, i) -> userResult(UserWrapper.ACTION_RET_EXIT_PAGE, "exit"));
             dialog02.setNegativeButton("Cancel", null).create();
             dialog02.show();
         });
@@ -166,33 +134,33 @@ public class MockUser implements InterfaceUser {
 
     public void enterPlatform() {
         LogD("enterPlatform() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "enterPlatform() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "enterPlatform() invoked!");
 
     }
 
     @Override
     public void showToolBar(int place) {
         LogD("showToolBar(" + place + ") invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "showToolBar(" + place + ") invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "showToolBar(" + place + ") invoked!");
     }
 
     @Override
     public void hideToolBar() {
         LogD("hideToolBar() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "hideToolBar() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "hideToolBar() invoked!");
     }
 
     @Override
     public void setUserInfo(Hashtable<String, String> userInfo) {
         this.userInfo = userInfo;
         LogD("setUserInfo(" + userInfo.toString() + ") invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "setUserInfo(" + userInfo + ") invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "setUserInfo(" + userInfo + ") invoked!");
     }
 
     @Override
     public Hashtable<String, String> getUserInfo() {
         LogD("getUserInfo() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "getUserInfo() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "getUserInfo() invoked!");
         return this.userInfo;
     }
 
@@ -203,112 +171,70 @@ public class MockUser implements InterfaceUser {
 
     public void antiAddictionQuery() {
         LogD("antiAddictionQuery() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "antiAddictionQuery() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "antiAddictionQuery() invoked!");
     }
 
     public void realNameRegister() {
         LogD("realNameRegister() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "realNameRegister() invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "realNameRegister() invoked!");
     }
 
     public void submitLoginGameRole(Hashtable<String, String> info) {
         LogD("submitLoginGameRole(" + info.toString() + ")invoked");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "submitLoginGameRole(" + info + ")invoked", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "submitLoginGameRole(" + info + ")invoked");
     }
 
     public void accountSwitch() {
         LogD("accountSwitch() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "accountSwitch() invoked!", Toast.LENGTH_SHORT).show());
-    }
-
-    public static void multiParam(int a, int b, String c) {
-        LogD("multiParam() invoked!" + a + "," + b + "," + c);
+        MockUtils.makeText(mContext, "accountSwitch() invoked!");
     }
 
     @Override
     public void submitScore(Hashtable<String, String> info) {
         LogD("submitScore(" + info.toString() + ")invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "submitScore(" + info + ")invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "submitScore(" + info + ")invoked!");
     }
 
     @Override
     public void showLeaderBoard(Hashtable<String, String> info) {
         LogD("showLeaderBoard(" + info.toString() + ")invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "showLeaderBoard(" + info + ")invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "showLeaderBoard(" + info + ")invoked!");
     }
 
     @Override
     public void unlockAchievement(Hashtable<String, String> achInfo) {
         LogD("unlockAchievement(" + achInfo.toString() + ")invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "unlockAchievement(" + achInfo + ")invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "unlockAchievement(" + achInfo + ")invoked!");
     }
 
     @Override
     public void showAchievements(Hashtable<String, String> achInfo) {
         LogD("showAchievements(" + achInfo.toString() + ") invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "showAchievements(" + achInfo + ") invoked!", Toast.LENGTH_SHORT).show());
+        MockUtils.makeText(mContext, "showAchievements(" + achInfo + ") invoked!");
+    }
+
+    private void userResult(int ret, String msg) {
+        UserWrapper.onUserResult(mAdapter, ret, msg);
+        LogD("userResult : %d msg : %s", ret, msg);
     }
 
     @Override
     public String getSDKVersion() {
         LogD("getSDKVersion() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "showAchievements() invoked!", Toast.LENGTH_SHORT).show());
         return SDKHelper.VERSION;
     }
 
     @Override
     public String getPluginVersion() {
         LogD("getPluginVersion() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "getPluginVersion() invoked!", Toast.LENGTH_SHORT).show());
         return SDKHelper.VERSION;
-    }
-
-    @Override
-    public boolean isFuncSupported(String functionName) {
-        LogD("isFunctionSupported(" + functionName + ")invoked!");
-        Method[] methods = this.getClass().getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals(functionName)) return true;
-        }
-        return false;
     }
 
     @Override
     public String getPluginId() {
         LogD("getPluginId() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "getPluginId() invoked!", Toast.LENGTH_SHORT).show());
-        return "MockUser";
+        return PLUGIN_ID;
     }
 
-    public static boolean getLoginState() {
-        LogD("getLoginState() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "getLoginState() invoked!", Toast.LENGTH_SHORT).show());
-        return mLogined;
-    }
-
-    public static void setLoginState(boolean flag) {
-        LogD("setLoginState() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "setLoginState() invoked!", Toast.LENGTH_SHORT).show());
-        mLogined = flag;
-    }
-
-    public static String getSimUserId() {
-        LogD("getSimUserId() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "getSimUserId() invoked!", Toast.LENGTH_SHORT).show());
-        return mUserId;
-    }
-
-    public static String getSimSessionId() {
-        LogD("getSimSessionId() invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "getSimSessionId() invoked!", Toast.LENGTH_SHORT).show());
-        return mSessionId;
-    }
-
-    public static void setSimUserInfo(String userId, String sessionId) {
-        LogD("setSimUserInfo(" + userId + ", " + sessionId + ") invoked!");
-        SDKWrapper.runOnMainThread(() -> Toast.makeText(mContext, "setSimUserInfo(" + userId + ", " + sessionId + ") invoked!", Toast.LENGTH_SHORT).show());
-        mUserId = userId;
-        mSessionId = sessionId;
-    }
 
 }

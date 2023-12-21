@@ -23,8 +23,6 @@ public interface InterfaceUser extends Interface {
 
     void login();
 
-    void login(Hashtable<String, String> extension);
-
     void logout();
 
     void submitScore(Hashtable<String, String> info);
