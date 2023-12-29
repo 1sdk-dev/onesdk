@@ -40,88 +40,88 @@ public class SDKWrapper {
         SDKHelper.analyticsSDKHubConfig();
     }
 
-    private static final Vector<IActivityCallback> mActivityCallback = new Vector<>();
+    private static final Vector<IActivityLifeCycle> mActivityCallback = new Vector<>();
 
     public static void onActivityResult(int requestCode, int resultCode, Intent data) {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onActivityResult(requestCode, resultCode, data);
         }
     }
 
     public static void onPause() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onPause();
         }
     }
 
     public static void onResume() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onResume();
         }
     }
 
     public static void onNewIntent(Intent intent) {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onNewIntent(intent);
         }
     }
 
     public static void onStop() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onStop();
         }
     }
 
     public static void onDestroy() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onDestroy();
         }
         NativeInvoker.onPurge();
     }
 
     public static void onRestart() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onRestart();
         }
     }
 
     public static void onBackPressed() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onBackPressed();
         }
     }
 
     public static void onConfigurationChanged(Configuration newConfig) {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onConfigurationChanged(newConfig);
         }
     }
 
     public static void onRestoreInstanceState(Bundle savedInstanceState) {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onRestoreInstanceState(savedInstanceState);
         }
     }
 
     public static void onSaveInstanceState(Bundle outState) {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onSaveInstanceState(outState);
         }
     }
 
     public static void onStart() {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onStart();
         }
     }
 
     public static void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        for (IActivityCallback callback : mActivityCallback) {
+        for (IActivityLifeCycle callback : mActivityCallback) {
             callback.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    public static void setActivityCallback(IActivityCallback activityCallback) {
+    public static void setActivityCallback(IActivityLifeCycle activityCallback) {
         mActivityCallback.add(activityCallback);
     }
 

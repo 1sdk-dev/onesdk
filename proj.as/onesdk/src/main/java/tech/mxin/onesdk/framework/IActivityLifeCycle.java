@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
-public interface IActivityCallback {
+public interface IActivityLifeCycle {
 
     default void onActivityResult(int requestCode, int resultCode, Intent data) {
     }
