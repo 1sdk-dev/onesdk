@@ -1,0 +1,16 @@
+workspace 'onesdk.xcworkspace'
+
+project 'app/app.xcodeproj'
+project 'onesdk/onesdk.xcodeproj'
+
+platform :ios, '9.0'
+# use_frameworks!
+use_frameworks! :linkage => :static
+
+target 'app' do
+    project 'app/app.xcodeproj'
+end
+
+target 'onesdk' do
+    project 'onesdk/onesdk.xcodeproj'
+end

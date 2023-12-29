@@ -1,0 +1,6 @@
+.DS_Store
+.idea/
+*.xcworkspace
+Pods
+Podfile.lock
+*.iml
