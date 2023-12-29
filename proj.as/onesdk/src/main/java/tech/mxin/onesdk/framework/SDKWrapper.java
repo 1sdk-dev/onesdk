@@ -30,12 +30,16 @@ import java.util.Vector;
 
 public class SDKWrapper {
     private static WeakReference<Context> contextRef = null;
+    private static WeakReference<Application> applicationRef = null;
     private static Handler mainHandler = null;
 
     public static void init(Context context) {
         contextRef = new WeakReference<>(context);
         if (null == mainHandler) {
             mainHandler = new Handler(Looper.getMainLooper());
+        }
+        if (null == applicationRef && context instanceof Activity) {
+            applicationRef = new WeakReference<>(((Activity) context).getApplication());
         }
         NativeInvoker.onInit();
         SDKHelper.analyticsSDKHubConfig();
@@ -132,44 +136,37 @@ public class SDKWrapper {
         mApplicationCallback.add(applicationCallback);
     }
 
-    public static void onApplicationCreate(Application application) {
+    public static void onAppCreate(Application application) {
+        applicationRef = new WeakReference<>(application);
         for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
-            applicationLifeCycle.onApplicationCreate(application);
+            applicationLifeCycle.onCreate(application);
         }
     }
 
-    public static void onCreate() {
-        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
-            applicationLifeCycle.onCreate();
-        }
-    }
-
-    public static void onTerminate() {
-        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
-            applicationLifeCycle.onTerminate();
-        }
-    }
-
-    public static void onConfigurationChanged() {
-        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
-            applicationLifeCycle.onConfigurationChanged();
-        }
-    }
-
-    public static void onLowMemory() {
+    public static void onAppLowMemory() {
         for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
             applicationLifeCycle.onLowMemory();
         }
     }
 
-    public static void onTrimMemory(final int level) {
+    public static void onAppTrimMemory(final int level) {
         for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
             applicationLifeCycle.onTrimMemory(level);
         }
     }
 
+    public static void onAppTerminate() {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onTerminate();
+        }
+    }
+
     public static Context getContext() {
         return contextRef.get();
+    }
+
+    public static Application getApplication() {
+        return applicationRef.get();
     }
 
     public static void runOnMainThread(Runnable r) {
