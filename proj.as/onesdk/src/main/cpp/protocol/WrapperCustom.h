@@ -17,7 +17,7 @@
 #ifndef ONESDK_WRAPPER_CUSTOM_H
 #define ONESDK_WRAPPER_CUSTOM_H
 
-#include "../include/IPluginCustom.h"
+#include "IPluginCustom.h"
 
 namespace onesdk {
 

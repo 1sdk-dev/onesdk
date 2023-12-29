@@ -17,7 +17,7 @@
 #ifndef ONESDK_WRAPPER_ADS_H
 #define ONESDK_WRAPPER_ADS_H
 
-#include "../include/IPluginAds.h"
+#include "IPluginAds.h"
 
 namespace onesdk {
 

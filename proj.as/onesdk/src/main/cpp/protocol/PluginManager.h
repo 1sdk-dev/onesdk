@@ -20,7 +20,7 @@
 #include <map>
 #include <string>
 
-#include "../include/IPlugin.h"
+#include "IPlugin.h"
 
 namespace onesdk {
 

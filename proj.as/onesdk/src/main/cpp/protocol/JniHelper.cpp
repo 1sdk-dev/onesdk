@@ -17,7 +17,7 @@
 #include <android/log.h>
 #include <pthread.h>
 
-#include "../include/JniHelper.h"
+#include "JniHelper.h"
 #include "PluginMacros.h"
 
 #define LOG_TAG "JniHelper"

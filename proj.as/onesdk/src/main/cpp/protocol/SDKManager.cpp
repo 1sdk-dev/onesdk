@@ -17,8 +17,8 @@
 #include <sstream>
 #include <vector>
 
-#include "../include/JniHelper.h"
-#include "../include/SDKManager.h"
+#include "JniHelper.h"
+#include "SDKManager.h"
 #include "PluginFactory.h"
 #include "PluginManager.h"
 #include "PluginUtils.h"

@@ -17,8 +17,8 @@
 #ifndef ONESDK_PLUGIN_FACTORY_H
 #define ONESDK_PLUGIN_FACTORY_H
 
-#include "../include/IPlugin.h"
-#include "../include/PluginDefines.h"
+#include "IPlugin.h"
+#include "PluginDefines.h"
 
 namespace onesdk {
 

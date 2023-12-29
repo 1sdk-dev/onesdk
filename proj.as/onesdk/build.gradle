@@ -29,7 +29,7 @@ android {
 
     prefab {
         onesdk {
-            headers "${project.projectDir}/src/main/cpp/include"
+            headers "${project.projectDir}/../../include/"
         }
     }
 

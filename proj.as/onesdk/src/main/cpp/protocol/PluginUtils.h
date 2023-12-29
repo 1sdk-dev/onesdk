@@ -22,9 +22,9 @@
 #include <vector>
 #include <android/log.h>
 
-#include "../include/JniHelper.h"
-#include "../include/IPlugin.h"
-#include "../include/PluginDefines.h"
+#include "JniHelper.h"
+#include "IPlugin.h"
+#include "PluginDefines.h"
 #include "PluginMacros.h"
 
 namespace onesdk {

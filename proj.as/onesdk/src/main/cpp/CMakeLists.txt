@@ -34,10 +34,6 @@ project("onesdk")
 # 目标库名称； 在子模块的 CMakeLists.txt 中，${PROJECT_NAME}
 # 出于相同目的而优选。
 
-include_directories(
-        include,
-        protocol
-        )
 #
 # 为了从 Java/Kotlin 将库加载到您的应用程序中，您必须调用
 # System.loadLibrary() 并传递此处定义的库的名称；
@@ -55,6 +51,11 @@ add_library(${CMAKE_PROJECT_NAME} STATIC
         protocol/WrapperUser.cpp
         protocol/WrapperFee.cpp
         protocol/WrapperAds.cpp
+        )
+
+target_include_directories(${CMAKE_PROJECT_NAME}
+        PUBLIC ../../../../../include
+        PRIVATE protocol
         )
 
 # 指定 CMake 应链接到目标库的库。 你

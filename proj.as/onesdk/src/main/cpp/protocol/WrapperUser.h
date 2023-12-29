@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include "../include/IPluginUser.h"
+#include "IPluginUser.h"
 
 namespace onesdk {
 

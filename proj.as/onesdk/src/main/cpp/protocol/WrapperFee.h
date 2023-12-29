@@ -17,7 +17,7 @@
 #ifndef ONESDK_WRAPPER_FEE_H
 #define ONESDK_WRAPPER_FEE_H
 
-#include "../include/IPluginFee.h"
+#include "IPluginFee.h"
 
 namespace onesdk {
 

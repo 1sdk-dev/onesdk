@@ -14,7 +14,7 @@
  * limitations under the License.
 */
 
-#include "../include/IPlugin.h"
+#include "IPlugin.h"
 #include "PluginUtils.h"
 
 #define _LOG_TAG "IPlugin"
