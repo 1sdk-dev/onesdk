@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  * <p>
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package tech.mxin.onesdk.framework;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -41,6 +42,8 @@ public class SDKWrapper {
     }
 
     private static final Vector<IActivityLifeCycle> mActivityCallback = new Vector<>();
+
+    private static final Vector<IApplicationLifeCycle> mApplicationCallback = new Vector<>();
 
     public static void onActivityResult(int requestCode, int resultCode, Intent data) {
         for (IActivityLifeCycle callback : mActivityCallback) {
@@ -123,6 +126,46 @@ public class SDKWrapper {
 
     public static void setActivityCallback(IActivityLifeCycle activityCallback) {
         mActivityCallback.add(activityCallback);
+    }
+
+    public static void setApplicationCallback(IApplicationLifeCycle applicationCallback) {
+        mApplicationCallback.add(applicationCallback);
+    }
+
+    public static void onApplicationCreate(Application application) {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onApplicationCreate(application);
+        }
+    }
+
+    public static void onCreate() {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onCreate();
+        }
+    }
+
+    public static void onTerminate() {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onTerminate();
+        }
+    }
+
+    public static void onConfigurationChanged() {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onConfigurationChanged();
+        }
+    }
+
+    public static void onLowMemory() {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onLowMemory();
+        }
+    }
+
+    public static void onTrimMemory(final int level) {
+        for (IApplicationLifeCycle applicationLifeCycle : mApplicationCallback) {
+            applicationLifeCycle.onTrimMemory(level);
+        }
     }
 
     public static Context getContext() {
